@@ -1,11 +1,7 @@
 package com.bgsoftware.wildloaders.hooks;
 
 import com.bgsoftware.wildloaders.api.hooks.ClaimsProvider;
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.FPlayer;
-import com.massivecraft.factions.FPlayers;
-import com.massivecraft.factions.Faction;
+import com.massivecraft.factions.*;
 import org.bukkit.Chunk;
 
 import java.util.UUID;
