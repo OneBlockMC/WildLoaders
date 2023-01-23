@@ -7,16 +7,23 @@ plugins {
 group 'WildLoaders'
 version = "2022.7"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 allprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
+        mavenCentral()
         maven { url 'https://repo.bg-software.com/repository/nms/' }
         maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
         maven { url 'https://repo.bg-software.com/repository/public-libs/' }
-        mavenCentral()
+        maven { url "https://repo.codemc.org/repository/maven-public/" }
 
         String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
         String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
@@ -35,6 +42,7 @@ allprojects {
     dependencies {
         compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
         compileOnly 'me.lucko:helper:5.6.13'
+        compileOnly 'world.bentobox:bentobox:1.16.5-SNAPSHOT'
     }
 
     task checkDebug() {
@@ -66,8 +74,6 @@ dependencies {
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
     implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
 
-    // Spigot jars
-    compileOnly "org.spigotmc:v1_8_R3:latest"
     compileOnly 'org.spigotmc:v1_16_R3-Tuinity:latest'
 }
 

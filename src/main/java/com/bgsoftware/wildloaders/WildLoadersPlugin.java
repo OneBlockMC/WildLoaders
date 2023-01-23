@@ -4,11 +4,14 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
+import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
 import com.bgsoftware.wildloaders.handlers.LoadersHandler;
 import com.bgsoftware.wildloaders.handlers.NPCHandler;
 import com.bgsoftware.wildloaders.handlers.ProvidersHandler;
 import com.bgsoftware.wildloaders.handlers.SettingsHandler;
+import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.island.impl.FileIslandChunkLoaderStorageDao;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
@@ -18,13 +21,19 @@ import com.bgsoftware.wildloaders.utils.Pair;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import me.lucko.helper.Commands;
+import org.bukkit.BanEntry;
 import org.bukkit.Bukkit;
 import org.bukkit.UnsafeValues;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import world.bentobox.bentobox.BentoBox;
+import world.bentobox.bentobox.database.objects.Island;
 
+import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
@@ -50,6 +59,22 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
+
+        IslandChunkLoaderStorageDao dao = new FileIslandChunkLoaderStorageDao();
+
+        Commands.create()
+                .assertPlayer()
+                .handler(context -> {
+                    Player sender = context.sender();
+                    Optional<Island> optional = BentoBox.getInstance().getIslands().getIslandAt(sender.getLocation());
+                    if (optional.isEmpty()) {
+                        context.reply("&cThere is no island present at your location.");
+                        return;
+                    }
+
+                    new PaginatedChunkLoaderListGui(optional.get(), dao, sender).open();
+                })
+                .register("chunkloaders");
     }
 
     @Override

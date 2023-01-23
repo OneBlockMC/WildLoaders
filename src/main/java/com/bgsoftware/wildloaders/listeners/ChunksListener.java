@@ -15,12 +15,12 @@ public final class ChunksListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onChunkUnload(ChunkUnloadEvent e){
-        try {
-            if (plugin.getLoaders().getChunkLoader(e.getChunk()).isPresent())
-                e.setCancelled(true);
-        }catch (Throwable ignored){}
-    }
+//    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+//    public void onChunkUnload(ChunkUnloadEvent e){
+//        try {
+//            if (plugin.getLoaders().getChunkLoader(e.getChunk()).isPresent())
+//                e.setCancelled(true);
+//        }catch (Throwable ignored){}
+//    }
 
 }

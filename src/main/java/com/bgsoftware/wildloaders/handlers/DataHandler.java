@@ -54,8 +54,8 @@ public final class DataHandler {
 
                 Material blockType = location.getBlock().getType();
 
-                if(ServerVersion.isLegacy() && blockType == Material.CAULDRON){
-                    blockType = Material.CAULDRON_ITEM;
+                if(ServerVersion.isLegacy() && blockType.name().contains("CAULDRON")){
+                    blockType = Material.valueOf("CAULDRON_ITEM");
                 }
 
                 if(blockType != loaderData.get().getLoaderItem().getType()){
