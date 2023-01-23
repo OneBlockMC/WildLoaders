@@ -63,6 +63,11 @@ public final class WChunkLoader implements ChunkLoader {
         return timeLeft;
     }
 
+    @Override
+    public void setTimeLeft(long provided) {
+        this.timeLeft = provided;
+    }
+
     public void tick() {
         plugin.getProviders().tick(loadedChunks);
 

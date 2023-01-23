@@ -28,6 +28,12 @@ public interface ChunkLoader {
     long getTimeLeft();
 
     /**
+     * Set the amount of time that is left until the chunk loader finishes, in ticks.
+     */
+    void setTimeLeft(long ticks);
+
+
+    /**
      * Get the location of the chunk loader.
      */
     Location getLocation();
