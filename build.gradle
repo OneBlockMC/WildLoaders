@@ -1,5 +1,3 @@
-import org.gradle.api.GradleException
-
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
@@ -18,6 +16,7 @@ allprojects {
         maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
         maven { url 'https://repo.bg-software.com/repository/public-libs/' }
+        mavenCentral()
 
         String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
         String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
@@ -35,6 +34,7 @@ allprojects {
 
     dependencies {
         compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
+        compileOnly 'me.lucko:helper:5.6.13'
     }
 
     task checkDebug() {
@@ -42,7 +42,7 @@ allprojects {
             file.text.contains('Bukkit.broadcastMessage')
         }.getFiles()
 
-        if(!filesWithDebug.isEmpty())
+        if (!filesWithDebug.isEmpty())
             throw new GradleException("Found debug messages: " + filesWithDebug)
     }
 
