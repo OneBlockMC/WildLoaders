@@ -17,6 +17,7 @@ import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.utils.Pair;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
+import me.lucko.helper.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.UnsafeValues;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,8 +59,6 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
         }
 
-        log("******** ENABLE START ********");
-
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
         npcHandler = new NPCHandler(this);
@@ -75,15 +74,6 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         getCommand("loader").setTabCompleter(commandsHandler);
 
         Locale.reload();
-
-        if (Updater.isOutdated()) {
-            log("");
-            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
-            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
-            log("");
-        }
-
-        log("******** ENABLE DONE ********");
     }
 
     @Override
