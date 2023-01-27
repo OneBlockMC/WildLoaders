@@ -49,8 +49,11 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     private boolean shouldEnable = true;
 
+    private int chunkLoaderLimit;
+
     @Override
     public void onLoad() {
+        chunkLoaderLimit = getConfig().getInt("chunk-loader-limit");
         plugin = this;
         new Metrics(this);
 
@@ -203,4 +206,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         return plugin;
     }
 
+    public int getChunkLoaderLimit() {
+        return chunkLoaderLimit;
+    }
 }

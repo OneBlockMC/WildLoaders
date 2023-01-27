@@ -42,7 +42,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                         player.sendMessage("debug message");
                                     }, () -> {
                                         gui.close();
-                                        player.teleport(position.toLocation());
+                                        player.teleport(position.toLocation().add(0, 1, 0));
                                         player.sendMessage(Text.colorize("&a&oTeleporting you to the chunk loader..."));
                                     });
                         })
