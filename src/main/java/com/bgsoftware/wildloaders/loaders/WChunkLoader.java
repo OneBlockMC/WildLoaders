@@ -7,18 +7,11 @@ import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import me.lucko.helper.text3.Text;
+import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class WChunkLoader implements ChunkLoader {
 
@@ -31,6 +24,7 @@ public final class WChunkLoader implements ChunkLoader {
     private final ITileEntityChunkLoader tileEntityChunkLoader;
 
     private boolean active = true;
+    private boolean waiting = false;
     private long timeLeft;
 
     public WChunkLoader(LoaderData loaderData, UUID whoPlaced, Location location, long timeLeft) {
@@ -69,13 +63,18 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public void tick() {
-        plugin.getProviders().tick(loadedChunks);
+        if (!(timeLeft < 0)) {
+            plugin.getProviders().tick(loadedChunks);
+        }
 
         if (!isInfinite()) {
             timeLeft--;
-            if (timeLeft < 0) {
-                remove();
-            } else if (timeLeft > 0 && timeLeft % 10 == 0) {
+            if (timeLeft < 0 && !waiting) {
+                waiting = true;
+                List<Hologram> holograms = getHolograms().stream().toList();
+                holograms.get(1).setHologramName(Text.colorize("&cThis chunk loader has run out of time."));
+                holograms.get(0).setHologramName(Text.colorize("&cPurchase more time for this chunk loader to activate."));
+            } else if (!waiting && timeLeft > 0 && timeLeft % 10 == 0) {
                 Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
                         .setObject(timeLeft)
                         .setLocation(location)
@@ -165,4 +164,7 @@ public final class WChunkLoader implements ChunkLoader {
 
     }
 
+    public boolean isWaiting() {
+        return waiting;
+    }
 }

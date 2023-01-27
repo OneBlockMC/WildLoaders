@@ -87,7 +87,7 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
             return;
         }
 
-        if (chunkLoader.isInfinite())
+        if (chunkLoader.isInfinite() || chunkLoader.isWaiting())
             return;
 
         List<String> hologramLines = chunkLoader.getHologramLines();
