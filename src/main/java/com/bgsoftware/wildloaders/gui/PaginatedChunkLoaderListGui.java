@@ -30,7 +30,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                     .name("&a&oChunk Loader")
                                     .lore(
                                             " ",
-                                            "&f&l* &7Time Left&f: " + DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true),
+                                            "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
                                             "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
                                             " ",
                                             "&f&l* &e&oLeft-Click to teleport",

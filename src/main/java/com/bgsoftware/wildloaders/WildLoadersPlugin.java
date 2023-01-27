@@ -51,9 +51,11 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     private int chunkLoaderLimit;
 
+    private IslandChunkLoaderStorageDao dao;
+
     @Override
     public void onLoad() {
-        chunkLoaderLimit = getConfig().getInt("chunk-loader-limit");
+        chunkLoaderLimit = getConfig().getInt("chunk-loader-limit", 5);
         plugin = this;
         new Metrics(this);
 
@@ -63,7 +65,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
 
-        IslandChunkLoaderStorageDao dao = new FileIslandChunkLoaderStorageDao();
+        this.dao = new FileIslandChunkLoaderStorageDao();
 
         Commands.create()
                 .assertPlayer()
@@ -93,7 +95,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         providersHandler = new ProvidersHandler(this);
         settingsHandler = new SettingsHandler(this);
 
-        getServer().getPluginManager().registerEvents(new BlocksListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlocksListener(this, dao), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
 
