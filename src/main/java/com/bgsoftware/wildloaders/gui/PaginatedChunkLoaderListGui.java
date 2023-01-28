@@ -37,26 +37,37 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                             .map(chunkLoader -> {
                                 BlockPosition position = BlockPosition.of(chunkLoader.getLocation());
 
-                                return ItemStackBuilder.of(Material.BEACON)
-                                        .name(dao.getCustomLoaderName(chunkLoader.getLocation()).orElse("Chunk Loader"))
-                                        .lore(
-                                                " ",
-                                                "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
-                                                "&f&l* &7Status&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cDisabled" : "&aEnabled"),
-                                                "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
-                                                " ",
-                                                "&f&l* &e&oLeft-Click to teleport",
-                                                "&f&l* &e&oRight-Click to make changes",
-                                                " "
-                                        )
-                                        .build(() -> {
-                                            gui.close();
-                                            new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
-                                        }, () -> {
-                                            gui.close();
-                                            player.teleport(position.toLocation().add(0, 1, 0));
-                                            player.sendMessage(Text.colorize("&a&oTeleporting you to the chunk loader..."));
-                                        });
+                                return chunkLoader.getNPC()
+                                        .map(npc ->
+                                                ItemStackBuilder.of(Material.BEACON)
+                                                        .name(dao.getCustomLoaderName(npc).orElse("Chunk Loader"))
+                                                        .lore(
+                                                                " ",
+                                                                "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
+                                                                "&f&l* &7Status&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cDisabled" : "&aEnabled"),
+                                                                "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
+                                                                " ",
+                                                                "&f&l* &e&oLeft-Click to teleport",
+                                                                "&f&l* &e&oRight-Click to make changes",
+                                                                " "
+                                                        )
+                                                        .build(() -> {
+                                                            gui.close();
+                                                            new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
+                                                        }, () -> {
+                                                            gui.close();
+                                                            player.teleport(position.toLocation().add(0, 1, 0));
+                                                            player.sendMessage(Text.colorize("&a&oTeleporting you to the chunk loader..."));
+                                                        }))
+                                        .orElse(ItemStackBuilder.of(Material.BARRIER)
+                                                .name("&4&lError Processing Chunk Loader")
+                                                .lore(
+                                                        " ",
+                                                        "&cThe chunk loader info could not",
+                                                        "&cbe loaded at this time. Please contact",
+                                                        "&ca staff member if this issue persists.",
+                                                        " "
+                                                ).build(null));
                             })
                             .collect(Collectors.toList());
                 },

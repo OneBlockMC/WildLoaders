@@ -3,6 +3,7 @@ package com.bgsoftware.wildloaders;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
 import com.bgsoftware.wildloaders.handlers.DataHandler;
@@ -96,14 +97,14 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
         }
 
+        this.dao = new FileIslandChunkLoaderStorageDao(this);
+        dao.setup();
+
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
         npcHandler = new NPCHandler(this);
         providersHandler = new ProvidersHandler(this);
         settingsHandler = new SettingsHandler(this);
-
-        this.dao = new FileIslandChunkLoaderStorageDao(this);
-        dao.setup();
 
         RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
         if (provider == null) {
@@ -142,9 +143,18 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
                     Location location = renameCache.get(player.getUniqueId()).toLocation();
 
+
                     loadersHandler.getChunkLoader(location).ifPresentOrElse(loader -> {
-                        dao.setCustomLoaderName(loader, message);
+                        Optional<ChunkLoaderNPC> optional = loader.getNPC();
+                        if (optional.isEmpty()) {
+                            player.sendMessage(Text.colorize("&cThere was an error setting the name for your chunk loader. Contact staff for help."));
+                            return;
+                        }
+
+                        ChunkLoaderNPC npc = optional.get();
+                        dao.setCustomLoaderName(npc, message);
                         renameCache.remove(player.getUniqueId());
+
                         player.sendMessage(Text.colorize("&aSuccessfully renamed your chunk loader."));
                     }, () -> {
                         renameCache.remove(player.getUniqueId());

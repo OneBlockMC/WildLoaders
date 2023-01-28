@@ -28,6 +28,9 @@ public class ChunkLoaderPurchaseGui extends Gui {
 
     static {
         LOADER_INFO_TABLE.put(10, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofHours(6L), 600_000D));
+        LOADER_INFO_TABLE.put(12, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofHours(12L), 900_000D));
+        LOADER_INFO_TABLE.put(14, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofDays(1L), 1_500_000D));
+        LOADER_INFO_TABLE.put(16, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofDays(3L), 3_900_000D));
     }
 
     private static final MenuScheme PANE_SCHEME = new MenuScheme(StandardSchemeMappings.STAINED_GLASS)

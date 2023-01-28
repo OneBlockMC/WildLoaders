@@ -13,6 +13,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.libs.org.apache.maven.repository.internal.DefaultVersionRangeResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -88,8 +89,13 @@ public final class BlocksListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onLoaderBreak(BlockBreakEvent e) {
-        if (handleLoaderBreak(e.getBlock(), e.getPlayer().getGameMode() != GameMode.CREATIVE))
-            Locale.BROKE_LOADER.send(e.getPlayer());
+        if (plugin.getLoaders().getChunkLoader(e.getBlock().getLocation()).isPresent()) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(Text.colorize("&cPlease remove chunk loaders through the chunk loader menu."));
+        }
+
+//        if (handleLoaderBreak(e.getBlock(), e.getPlayer().getGameMode() != GameMode.CREATIVE))
+//            Locale.BROKE_LOADER.send(e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

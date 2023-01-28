@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.island;
 
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import org.bukkit.Location;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -23,9 +24,9 @@ public interface IslandChunkLoaderStorageDao {
                 .collect(Collectors.toSet());
     }
 
-    Optional<String> getCustomLoaderName(Location location);
+    Optional<String> getCustomLoaderName(ChunkLoaderNPC npc);
 
-    void setCustomLoaderName(ChunkLoader loader, String name);
+    void setCustomLoaderName(ChunkLoaderNPC npc, String name);
 
     void setup();
 
