@@ -134,15 +134,14 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                 .handler(event -> {
                     Player player = event.getPlayer();
                     String message = ChatColor.stripColor(event.getMessage());
+                    event.setCancelled(true);
+
                     if (message.length() > 20) {
                         player.sendMessage(Text.colorize("&cPlease make your chunk loader name 20 characters or less."));
                         return;
                     }
 
-                    event.setCancelled(true);
-
                     Location location = renameCache.get(player.getUniqueId()).toLocation();
-
 
                     loadersHandler.getChunkLoader(location).ifPresentOrElse(loader -> {
                         Optional<ChunkLoaderNPC> optional = loader.getNPC();
