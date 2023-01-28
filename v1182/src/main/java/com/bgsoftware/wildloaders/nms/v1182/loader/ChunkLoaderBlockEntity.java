@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1182.EntityHologram;
+import me.lucko.helper.time.DurationFormatter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +33,6 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
     private final BlockPos blockPos;
 
     private short currentTick = 20;
-    private short daysAmount, hoursAmount, minutesAmount, secondsAmount;
     public boolean removed = false;
 
     public ChunkLoaderBlockEntity(ChunkLoader chunkLoader, ServerLevel serverLevel, BlockPos blockPos) {
@@ -45,21 +46,6 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
         setLevel(serverLevel);
 
         loaderBlock = serverLevel.getBlockState(blockPos).getBlock();
-
-        if (!this.chunkLoader.isInfinite()) {
-            long timeLeft = chunkLoader.getTimeLeft();
-
-            daysAmount = (short) (timeLeft / 86400);
-            timeLeft = timeLeft % 86400;
-
-            hoursAmount = (short) (timeLeft / 3600);
-            timeLeft = timeLeft % 3600;
-
-            minutesAmount = (short) (timeLeft / 60);
-            timeLeft = timeLeft % 60;
-
-            secondsAmount = (short) timeLeft;
-        }
 
         long chunkPosLong = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         chunkLoaderBlockEntityMap.put(chunkPosLong, this);
@@ -90,30 +76,14 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
         if (chunkLoader.isInfinite() || chunkLoader.isWaiting())
             return;
 
-        List<String> hologramLines = chunkLoader.getHologramLines();
+        chunkLoader.tick();
 
+        List<String> hologramLines = chunkLoader.getHologramLines();
         int hologramsAmount = holograms.size();
+
         for (int i = hologramsAmount; i > 0; i--) {
             EntityHologram hologram = holograms.get(hologramsAmount - i);
             updateName(hologram, hologramLines.get(i - 1));
-        }
-
-        chunkLoader.tick();
-
-        if (!removed) {
-            secondsAmount--;
-            if (secondsAmount < 0) {
-                secondsAmount = 59;
-                minutesAmount--;
-                if (minutesAmount < 0) {
-                    minutesAmount = 59;
-                    hoursAmount--;
-                    if (hoursAmount < 0) {
-                        hoursAmount = 23;
-                        daysAmount--;
-                    }
-                }
-            }
         }
     }
 
@@ -135,10 +105,7 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
         assert chunkLoader.getWhoPlaced().getName() != null;
         hologram.setHologramName(line
                 .replace("{0}", chunkLoader.getWhoPlaced().getName())
-                .replace("{1}", daysAmount + "")
-                .replace("{2}", hoursAmount + "")
-                .replace("{3}", minutesAmount + "")
-                .replace("{4}", secondsAmount + "")
+                .replace("{1}", DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true))
         );
     }
 
