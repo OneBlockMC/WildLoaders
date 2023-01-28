@@ -21,10 +21,12 @@ import com.bgsoftware.wildloaders.utils.Pair;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import me.lucko.helper.Commands;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.BanEntry;
 import org.bukkit.Bukkit;
 import org.bukkit.UnsafeValues;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
@@ -64,22 +66,6 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
         if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
-
-        this.dao = new FileIslandChunkLoaderStorageDao();
-
-        Commands.create()
-                .assertPlayer()
-                .handler(context -> {
-                    Player sender = context.sender();
-                    Optional<Island> optional = BentoBox.getInstance().getIslands().getIslandAt(sender.getLocation());
-                    if (optional.isEmpty()) {
-                        context.reply("&cThere is no island present at your location.");
-                        return;
-                    }
-
-                    new PaginatedChunkLoaderListGui(optional.get(), dao, sender).open();
-                })
-                .register("chunkloaders");
     }
 
     @Override
@@ -94,6 +80,31 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         npcHandler = new NPCHandler(this);
         providersHandler = new ProvidersHandler(this);
         settingsHandler = new SettingsHandler(this);
+
+        this.dao = new FileIslandChunkLoaderStorageDao(this);
+        dao.setup();
+
+        RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
+        if (provider == null) {
+            getLogger().severe("Could not load WildLoaders. No economy service implementation is present.");
+            return;
+        }
+
+        Economy economy = provider.getProvider();
+
+        Commands.create()
+                .assertPlayer()
+                .handler(context -> {
+                    Player sender = context.sender();
+                    Optional<Island> optional = BentoBox.getInstance().getIslands().getIslandAt(sender.getLocation());
+                    if (optional.isEmpty()) {
+                        context.reply("&cThere is no island present at your location.");
+                        return;
+                    }
+
+                    new PaginatedChunkLoaderListGui(optional.get(), dao, this, economy, sender).open();
+                })
+                .register("chunkloaders");
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this, dao), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
@@ -112,6 +123,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             Database.stop();
             loadersHandler.removeChunkLoaders();
             npcHandler.killAllNPCs();
+            dao.shutdown();
         }
     }
 
@@ -135,8 +147,8 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             );
 
             for (Pair<Integer, String> versionData : versions) {
-                if (dataVersion <= versionData.first) {
-                    version = versionData.second;
+                if (dataVersion <= versionData.getFirst()) {
+                    version = versionData.getSecond();
                     break;
                 }
             }

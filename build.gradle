@@ -18,12 +18,23 @@ allprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
-        mavenCentral()
+        maven { url 'https://jitpack.io' }
         maven { url 'https://repo.bg-software.com/repository/nms/' }
         maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
         maven { url 'https://repo.bg-software.com/repository/public-libs/' }
         maven { url "https://repo.codemc.org/repository/maven-public/" }
+        maven {
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+            // As of Gradle 5.1, you can limit this to only those
+            // dependencies you expect from it
+            content {
+                includeGroup 'org.bukkit'
+                includeGroup 'org.spigotmc'
+            }
+        }
+        mavenCentral()
 
         String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
         String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
@@ -43,6 +54,7 @@ allprojects {
         compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
         compileOnly 'me.lucko:helper:5.6.13'
         compileOnly 'world.bentobox:bentobox:1.16.5-SNAPSHOT'
+        compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     }
 
     task checkDebug() {

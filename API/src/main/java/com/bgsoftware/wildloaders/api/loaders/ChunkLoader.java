@@ -7,10 +7,14 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Optional;
 
 public interface ChunkLoader {
+
+    Duration MAX_ACTIVITY_TIME = Duration.of(3L, ChronoUnit.DAYS);
 
     /**
      * Get the loader data from of chunk loader.
@@ -62,5 +66,10 @@ public interface ChunkLoader {
      * Get the holograms of the chunk loader.
      */
     Collection<Hologram> getHolograms();
+
+    boolean isWaiting();
+
+    void setWaiting(boolean value);
+
 
 }

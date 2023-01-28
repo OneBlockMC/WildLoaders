@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import org.bukkit.Location;
 import world.bentobox.bentobox.database.objects.Island;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,5 +22,13 @@ public interface IslandChunkLoaderStorageDao {
                 })
                 .collect(Collectors.toSet());
     }
+
+    Optional<String> getCustomLoaderName(Location location);
+
+    void setCustomLoaderName(ChunkLoader loader, String name);
+
+    void setup();
+
+    void shutdown();
 
 }

@@ -8,9 +8,11 @@ import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.bgsoftware.wildloaders.utils.threads.Executor;
 import me.lucko.helper.text3.Text;
+import me.lucko.helper.time.DurationFormatter;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 
+import java.time.Duration;
 import java.util.*;
 
 public final class WChunkLoader implements ChunkLoader {
@@ -27,6 +29,8 @@ public final class WChunkLoader implements ChunkLoader {
     private boolean waiting = false;
     private long timeLeft;
 
+    private final List<Hologram> holograms;
+
     public WChunkLoader(LoaderData loaderData, UUID whoPlaced, Location location, long timeLeft) {
         this.loaderName = loaderData.getName();
         this.whoPlaced = whoPlaced;
@@ -34,6 +38,7 @@ public final class WChunkLoader implements ChunkLoader {
         this.loadedChunks = calculateChunks(loaderData, whoPlaced, this.location);
         this.timeLeft = timeLeft;
         this.tileEntityChunkLoader = plugin.getNMSAdapter().createLoader(this);
+        this.holograms = tileEntityChunkLoader.getHolograms().stream().toList();
     }
 
     @Override
@@ -71,7 +76,6 @@ public final class WChunkLoader implements ChunkLoader {
             timeLeft--;
             if (timeLeft < 0 && !waiting) {
                 waiting = true;
-                List<Hologram> holograms = getHolograms().stream().toList();
                 holograms.get(1).setHologramName(Text.colorize("&cThis chunk loader has run out of time."));
                 holograms.get(0).setHologramName(Text.colorize("&cPurchase more time for this chunk loader to activate."));
             } else if (!waiting && timeLeft > 0 && timeLeft % 10 == 0) {
@@ -122,7 +126,17 @@ public final class WChunkLoader implements ChunkLoader {
 
     @Override
     public Collection<Hologram> getHolograms() {
-        return tileEntityChunkLoader.getHolograms();
+        return holograms;
+    }
+
+    @Override
+    public boolean isWaiting() {
+        return waiting;
+    }
+
+    @Override
+    public void setWaiting(boolean value) {
+        this.waiting = value;
     }
 
     public List<String> getHologramLines() {
@@ -162,9 +176,5 @@ public final class WChunkLoader implements ChunkLoader {
             }
         }
 
-    }
-
-    public boolean isWaiting() {
-        return waiting;
     }
 }

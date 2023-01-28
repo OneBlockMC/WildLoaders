@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.gui;
 
+import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
 import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.menu.paginated.PaginatedGui;
@@ -9,10 +10,10 @@ import me.lucko.helper.menu.scheme.StandardSchemeMappings;
 import me.lucko.helper.serialize.BlockPosition;
 import me.lucko.helper.text3.Text;
 import me.lucko.helper.time.DurationFormatter;
+import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.time.Duration;
@@ -20,14 +21,14 @@ import java.util.stream.Collectors;
 
 public class PaginatedChunkLoaderListGui extends PaginatedGui {
 
-    public PaginatedChunkLoaderListGui(Island island, IslandChunkLoaderStorageDao dao, Player player) {
+    public PaginatedChunkLoaderListGui(Island island, IslandChunkLoaderStorageDao dao, WildLoadersPlugin plugin, Economy economy, Player player) {
         super(gui -> dao.getChunkLoadersOnIsland(island)
                         .stream()
                         .map(chunkLoader -> {
                             BlockPosition position = BlockPosition.of(chunkLoader.getLocation());
 
                             return ItemStackBuilder.of(Material.BEACON)
-                                    .name("&a&oChunk Loader")
+                                    .name(dao.getCustomLoaderName(chunkLoader.getLocation()).orElse("Chunk Loader"))
                                     .lore(
                                             " ",
                                             "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
@@ -39,7 +40,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                     )
                                     .build(() -> {
                                         gui.close();
-                                        player.sendMessage("debug message");
+                                        new ChunkLoaderManageGui(player, dao, plugin, chunkLoader, economy).open();
                                     }, () -> {
                                         gui.close();
                                         player.teleport(position.toLocation().add(0, 1, 0));
