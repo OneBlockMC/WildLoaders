@@ -41,7 +41,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                     )
                                     .build(() -> {
                                         gui.close();
-                                        new ChunkLoaderManageGui(player, dao, plugin, chunkLoader, economy).open();
+                                        new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
                                     }, () -> {
                                         gui.close();
                                         player.teleport(position.toLocation().add(0, 1, 0));

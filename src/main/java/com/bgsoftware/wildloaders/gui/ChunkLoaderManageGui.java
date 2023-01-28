@@ -2,9 +2,10 @@ package com.bgsoftware.wildloaders.gui;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
 import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.menu.Gui;
+import me.lucko.helper.menu.scheme.MenuScheme;
+import me.lucko.helper.menu.scheme.StandardSchemeMappings;
 import me.lucko.helper.serialize.Position;
 import me.lucko.helper.text3.Text;
 import net.milkbowl.vault.economy.Economy;
@@ -13,14 +14,20 @@ import org.bukkit.entity.Player;
 
 public class ChunkLoaderManageGui extends Gui {
 
-    private final IslandChunkLoaderStorageDao dao;
+    private static final MenuScheme PANE_SCHEME = new MenuScheme(StandardSchemeMappings.STAINED_GLASS)
+            .mask("111111111")
+            .mask("110101011")
+            .mask("111111111")
+            .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0)
+            .scheme(0, 0, 0, 0, 0, 0)
+            .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
     private final WildLoadersPlugin plugin;
     private final ChunkLoader loader;
     private final Economy economy;
 
-    public ChunkLoaderManageGui(Player player, IslandChunkLoaderStorageDao dao, WildLoadersPlugin plugin, ChunkLoader loader, Economy economy) {
-        super(player, 3, "&dManage Chunk Loaders");
-        this.dao = dao;
+    public ChunkLoaderManageGui(Player player, WildLoadersPlugin plugin, ChunkLoader loader, Economy economy) {
+        super(player, 3, "&dManage Chunk Loader");
         this.loader = loader;
         this.plugin = plugin;
         this.economy = economy;
@@ -28,6 +35,8 @@ public class ChunkLoaderManageGui extends Gui {
 
     @Override
     public void redraw() {
+        PANE_SCHEME.apply(this);
+
         setItem(11, ItemStackBuilder.of(Material.NAME_TAG)
                 .name("&aRename")
                 .lore(
