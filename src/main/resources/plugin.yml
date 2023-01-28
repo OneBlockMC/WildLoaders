@@ -13,6 +13,7 @@ softdepend:
   - SuperiorSkyblock2
 depend:
   - Vault
+  - helper
 commands:
   loader:
     description: Main command for wild loaders.

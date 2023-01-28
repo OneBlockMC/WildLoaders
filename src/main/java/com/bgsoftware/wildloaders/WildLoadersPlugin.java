@@ -149,7 +149,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                     });
                 });
 
-        getServer().getPluginManager().registerEvents(new BlocksListener(this, dao), this);
+        getServer().getPluginManager().registerEvents(new BlocksListener(this, economy, dao), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
 
