@@ -1,5 +1,6 @@
 package com.bgsoftware.wildloaders.gui;
 
+import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.utils.Pair;
 import com.google.common.collect.ImmutableMap;
@@ -14,8 +15,6 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 
 public class ChunkLoaderTimeGui extends Gui {
-
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
 
     // Duration -> Pair<Friendly, Price>
     private static final ImmutableMap<Duration, Pair<String, Double>> DURATION_PRICE_MAP = ImmutableMap.<Duration, Pair<String, Double>>builder()
@@ -49,7 +48,7 @@ public class ChunkLoaderTimeGui extends Gui {
                     .name(friendly)
                     .lore(
                             " ",
-                            "&8* &fPrice: &2$" + DECIMAL_FORMAT.format(price),
+                            "&8* &fPrice: &2$" + WildLoadersPlugin.DECIMAL_FORMAT.format(price),
                             " "
                     )
                     .build(() -> {

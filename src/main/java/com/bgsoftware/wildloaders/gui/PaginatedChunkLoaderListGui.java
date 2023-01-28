@@ -22,33 +22,44 @@ import java.util.stream.Collectors;
 public class PaginatedChunkLoaderListGui extends PaginatedGui {
 
     public PaginatedChunkLoaderListGui(Island island, IslandChunkLoaderStorageDao dao, WildLoadersPlugin plugin, Economy economy, Player player) {
-        super(gui -> dao.getChunkLoadersOnIsland(island)
-                        .stream()
-                        .map(chunkLoader -> {
-                            BlockPosition position = BlockPosition.of(chunkLoader.getLocation());
+        super(gui -> {
+                    gui.setItem(40, ItemStackBuilder.of(Material.GOLD_INGOT)
+                            .name("&b&lBuy Chunk Loaders")
+                            .lore(
+                                    " ",
+                                    "&6&lClick &fto buy"
+                            )
+                            .build(() -> new ChunkLoaderPurchaseGui(player, island, plugin, economy, dao).open()));
 
-                            return ItemStackBuilder.of(Material.BEACON)
-                                    .name(dao.getCustomLoaderName(chunkLoader.getLocation()).orElse("Chunk Loader"))
-                                    .lore(
-                                            " ",
-                                            "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
-                                            "&f&l* &7Status&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cDisabled" : "&aEnabled"),
-                                            "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
-                                            " ",
-                                            "&f&l* &e&oLeft-Click to teleport",
-                                            "&f&l* &e&oRight-Click to make changes",
-                                            " "
-                                    )
-                                    .build(() -> {
-                                        gui.close();
-                                        new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
-                                    }, () -> {
-                                        gui.close();
-                                        player.teleport(position.toLocation().add(0, 1, 0));
-                                        player.sendMessage(Text.colorize("&a&oTeleporting you to the chunk loader..."));
-                                    });
-                        })
-                        .collect(Collectors.toList()),
+                    return dao.getChunkLoadersOnIsland(island)
+                            .stream()
+                            .sorted((first, second) -> (int) (second.getTimeLeft() - first.getTimeLeft()))
+                            .map(chunkLoader -> {
+                                BlockPosition position = BlockPosition.of(chunkLoader.getLocation());
+
+                                return ItemStackBuilder.of(Material.BEACON)
+                                        .name(dao.getCustomLoaderName(chunkLoader.getLocation()).orElse("Chunk Loader"))
+                                        .lore(
+                                                " ",
+                                                "&f&l* &7Time Left&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cTime Expired" : DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true)),
+                                                "&f&l* &7Status&f: " + (chunkLoader.getTimeLeft() <= 0 ? "&cDisabled" : "&aEnabled"),
+                                                "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
+                                                " ",
+                                                "&f&l* &e&oLeft-Click to teleport",
+                                                "&f&l* &e&oRight-Click to make changes",
+                                                " "
+                                        )
+                                        .build(() -> {
+                                            gui.close();
+                                            new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
+                                        }, () -> {
+                                            gui.close();
+                                            player.teleport(position.toLocation().add(0, 1, 0));
+                                            player.sendMessage(Text.colorize("&a&oTeleporting you to the chunk loader..."));
+                                        });
+                            })
+                            .collect(Collectors.toList());
+                },
 
                 player,
 
@@ -84,20 +95,20 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                 .mask("100000001")
                                 .mask("100000001")
                                 .mask("100000001")
-                                .mask("100000001")
+                                .mask("100101001")
                                 .mask("111111111")
                                 .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0)
                                 .scheme(0, 0)
                                 .scheme(0, 0)
                                 .scheme(0, 0)
-                                .scheme(0, 0)
+                                .scheme(0, 0, 0, 0)
                                 .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0))
 
                         .itemSlots(new MenuScheme()
                                 .mask("000000000")
                                 .mask("011111110")
                                 .mask("011111110")
-                                .mask("011111110")
+                                .mask("011000110")
                                 .mask("011111110")
                                 .getMaskedIndexesImmutable())
 

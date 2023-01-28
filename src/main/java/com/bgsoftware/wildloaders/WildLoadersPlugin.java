@@ -40,11 +40,14 @@ import world.bentobox.bentobox.database.objects.Island;
 import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
 import java.rmi.server.UID;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("deprecation")
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
+
+    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
 
     private final Map<UUID, Position> renameCache = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.CREATED)
