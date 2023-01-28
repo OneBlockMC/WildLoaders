@@ -36,7 +36,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import world.bentobox.bentobox.BentoBox;
+import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bentobox.managers.RanksManager;
 
 import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
@@ -47,6 +49,11 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("deprecation")
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
+
+    public static final Flag MANAGE_CHUNK_LOADERS_FLAG = new Flag.Builder("MANAGE_CHUNK_LOADERS", Material.BEACON)
+            .defaultRank(RanksManager.OWNER_RANK)
+            .type(Flag.Type.SETTING)
+            .build();
 
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
 
@@ -97,6 +104,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
         }
 
+        BentoBox.getInstance()
+                .getFlagsManager()
+                .registerFlag(MANAGE_CHUNK_LOADERS_FLAG);
+
         this.dao = new FileIslandChunkLoaderStorageDao(this);
         dao.setup();
 
@@ -118,9 +129,18 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                 .assertPlayer()
                 .handler(context -> {
                     Player sender = context.sender();
-                    Optional<Island> optional = BentoBox.getInstance().getIslands().getIslandAt(sender.getLocation());
+                    Optional<Island> optional = BentoBox.getInstance()
+                            .getIslands()
+                            .getIslandAt(sender.getLocation());
+
                     if (optional.isEmpty()) {
                         context.reply("&cThere is no island present at your location.");
+                        return;
+                    }
+
+                    Island island = optional.get();
+                    if (!(island.getRank(sender.getUniqueId()) >= RanksManager.TRUSTED_RANK)) {
+                        context.reply("&cYou are not allowed to view chunk loaders on this island.");
                         return;
                     }
 

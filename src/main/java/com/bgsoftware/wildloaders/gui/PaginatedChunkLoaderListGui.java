@@ -14,6 +14,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 
 import java.time.Duration;
@@ -53,6 +54,12 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                                         )
                                                         .build(() -> {
                                                             gui.close();
+
+                                                            if (!island.isAllowed(User.getInstance(player.getPlayer()), WildLoadersPlugin.MANAGE_CHUNK_LOADERS_FLAG)) {
+                                                                player.sendMessage(Text.colorize("&cYou are not allowed to manage chunk loaders on this island."));
+                                                                return;
+                                                            }
+
                                                             new ChunkLoaderManageGui(player, plugin, chunkLoader, economy).open();
                                                         }, () -> {
                                                             gui.close();
