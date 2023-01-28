@@ -21,11 +21,17 @@ import com.bgsoftware.wildloaders.utils.Pair;
 import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import me.lucko.helper.Commands;
+import me.lucko.helper.Events;
+import me.lucko.helper.event.filter.EventFilters;
+import me.lucko.helper.serialize.Position;
+import me.lucko.helper.text3.Text;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.BanEntry;
-import org.bukkit.Bukkit;
-import org.bukkit.UnsafeValues;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import world.bentobox.bentobox.BentoBox;
@@ -33,11 +39,23 @@ import world.bentobox.bentobox.database.objects.Island;
 
 import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.rmi.server.UID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("deprecation")
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
+
+    private final Map<UUID, Position> renameCache = ExpiringMap.builder()
+            .expirationPolicy(ExpirationPolicy.CREATED)
+            .expiration(1L, TimeUnit.MINUTES)
+            .asyncExpirationListener((key, $) -> {
+                Player target = Bukkit.getPlayer((UUID) key);
+                if (target != null) {
+                    target.sendMessage(Text.colorize("&cYou have been renamed from the chunk loader naming queue."));
+                }
+            })
+            .build();
 
     private static WildLoadersPlugin plugin;
 
@@ -105,6 +123,31 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                     new PaginatedChunkLoaderListGui(optional.get(), dao, this, economy, sender).open();
                 })
                 .register("chunkloaders");
+
+        Events.subscribe(AsyncPlayerChatEvent.class, EventPriority.HIGHEST)
+                .filter(EventFilters.ignoreCancelled())
+                .filter(event -> renameCache.containsKey(event.getPlayer().getUniqueId()))
+                .handler(event -> {
+                    Player player = event.getPlayer();
+                    String message = ChatColor.stripColor(event.getMessage());
+                    if (message.length() > 20) {
+                        player.sendMessage(Text.colorize("&cPlease make your chunk loader name 20 characters or less."));
+                        return;
+                    }
+
+                    event.setCancelled(true);
+
+                    Location location = renameCache.get(player.getUniqueId()).toLocation();
+
+                    loadersHandler.getChunkLoader(location).ifPresentOrElse(loader -> {
+                        dao.setCustomLoaderName(loader, message);
+                        renameCache.remove(player.getUniqueId());
+                        player.sendMessage(Text.colorize("&aSuccessfully renamed your chunk loader."));
+                    }, () -> {
+                        renameCache.remove(player.getUniqueId());
+                        player.sendMessage(Text.colorize("&cThere was an issue while renaming that chunk loader. It is no longer present at the location."));
+                    });
+                });
 
         getServer().getPluginManager().registerEvents(new BlocksListener(this, dao), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
@@ -222,5 +265,9 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     public int getChunkLoaderLimit() {
         return chunkLoaderLimit;
+    }
+
+    public Map<UUID, Position> getRenameCache() {
+        return renameCache;
     }
 }

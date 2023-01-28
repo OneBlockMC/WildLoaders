@@ -11,6 +11,8 @@ softdepend:
   - FactionsX
   - Lands
   - SuperiorSkyblock2
+depend:
+  - Vault
 commands:
   loader:
     description: Main command for wild loaders.

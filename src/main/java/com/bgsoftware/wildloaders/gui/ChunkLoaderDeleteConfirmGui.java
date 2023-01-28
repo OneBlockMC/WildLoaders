@@ -49,7 +49,7 @@ public class ChunkLoaderDeleteConfirmGui extends Gui {
                         )
                         .build(() -> {
                             close();
-                            getPlayer().sendMessage(Text.colorize("&a&oYou have kept all your OneBlock settings."));
+                            getPlayer().sendMessage(Text.colorize("&aYou have kept your chunk loader."));
                         })));
 
         MIDDLE_ITEM_SLOTS.forEach(slot ->

@@ -5,6 +5,7 @@ import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
 import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.menu.Gui;
+import me.lucko.helper.serialize.Position;
 import me.lucko.helper.text3.Text;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
@@ -30,18 +31,24 @@ public class ChunkLoaderManageGui extends Gui {
         setItem(11, ItemStackBuilder.of(Material.NAME_TAG)
                 .name("&aRename")
                 .lore(
-                        "Click here to rename",
-                        "your Chunk Loader!"
+                        " ",
+                        "&fClick here to rename",
+                        "&fyour Chunk Loader!",
+                        " "
                 )
                 .build(() -> {
-                    //TODO
+                    close();
+                    plugin.getRenameCache().put(getPlayer().getUniqueId(), Position.of(loader.getLocation()));
+                    getPlayer().sendMessage(Text.colorize("&a&oPlease enter a name for your chunk loader."));
                 }));
 
         setItem(13, ItemStackBuilder.of(Material.GOLD_INGOT)
                 .name("&6Buy Time")
                 .lore(
+                        " ",
                         "&fClick to buy more time for",
-                        "&fyour Chunk Loader!"
+                        "&fyour Chunk Loader!",
+                        " "
                 )
                 .build(() -> {
                     if (loader.getTimeLeft() >= ChunkLoader.MAX_ACTIVITY_TIME.toSeconds()) {
@@ -56,8 +63,12 @@ public class ChunkLoaderManageGui extends Gui {
         setItem(15, ItemStackBuilder.of(Material.BARRIER)
                 .name("&cDelete Chunk Loader")
                 .lore(
+                        " ",
                         "&fClick here to delete",
-                        "&fyour Chunk Loader!"
+                        "&fyour Chunk Loader!",
+                        " ",
+                        "&cYou will not get the",
+                        "&cChunk Loader back."
                 )
                 .build(() -> {
                     close();

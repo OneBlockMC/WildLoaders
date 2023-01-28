@@ -53,10 +53,9 @@ public class ChunkLoaderTimeGui extends Gui {
                             " "
                     )
                     .build(() -> {
-
                         if (duration.plusSeconds(loader.getTimeLeft()).toSeconds() > ChunkLoader.MAX_ACTIVITY_TIME.toSeconds()) {
                             close();
-                            getPlayer().sendMessage(Text.colorize("&cYou cannot add this much time to your chunk loader. It surpasses the 3 day time limit."));
+                            getPlayer().sendMessage(Text.colorize("&cYou cannot add this much time to your chunk loader. It will surpass the 3 day time limit."));
                             return;
                         }
 

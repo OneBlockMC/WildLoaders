@@ -36,7 +36,7 @@ public class FileIslandChunkLoaderStorageDao extends FileStorageHandler<Map<Posi
 
     @Override
     public void setCustomLoaderName(ChunkLoader loader, String name) {
-        loaderNameMap.put(Position.of(loader.getLocation()), ChatColor.stripColor(name));
+        loaderNameMap.put(Position.of(loader.getLocation()), name);
     }
 
     @Override
