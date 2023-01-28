@@ -74,11 +74,11 @@ public final class WChunkLoader implements ChunkLoader {
 
         if (!isInfinite()) {
             timeLeft--;
-            if (timeLeft < 0 && !waiting) {
+            if (timeLeft <= 0 && !waiting) {
                 waiting = true;
                 holograms.get(1).setHologramName(Text.colorize("&cThis chunk loader has run out of time."));
                 holograms.get(0).setHologramName(Text.colorize("&cPurchase more time for this chunk loader to activate."));
-            } else if (!waiting && timeLeft > 0 && timeLeft % 10 == 0) {
+            } else if (!waiting && timeLeft % 10 == 0) {
                 Query.UPDATE_CHUNK_LOADER_TIME_LEFT.insertParameters()
                         .setObject(timeLeft)
                         .setLocation(location)
