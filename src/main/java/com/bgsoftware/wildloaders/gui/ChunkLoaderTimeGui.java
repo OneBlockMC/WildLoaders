@@ -7,14 +7,20 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.menu.Gui;
 import me.lucko.helper.text3.Text;
+import me.lucko.helper.time.DurationFormatter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.function.Function;
 
 public class ChunkLoaderTimeGui extends Gui {
+
+    private static final Function<ChunkLoader, Duration> TIME_LEFT_ACCUMULATOR = loader -> Duration.ofDays(3L).minus(Duration.ofSeconds(loader.getTimeLeft()));
 
     // Duration -> Pair<Friendly, Price>
     private static final ImmutableMap<Duration, Pair<String, Double>> DURATION_PRICE_MAP = ImmutableMap.<Duration, Pair<String, Double>>builder()
@@ -25,8 +31,8 @@ public class ChunkLoaderTimeGui extends Gui {
             .put(Duration.ofHours(16L), new Pair<>("&a16 Hours Time", 800_000D))
             .put(Duration.ofHours(20L), new Pair<>("&a20 Hours Time", 1_000_000D))
             .put(Duration.ofDays(1L), new Pair<>("&a1 Day Time", 1_200_000D))
-            .put(Duration.ofDays(2L), new Pair<>("&a2 Days Time", 2_400_000D))
-            .put(Duration.ofDays(3L), new Pair<>("&a3 Days Time", 3_600_000D))
+//            .put(Duration.ofDays(2L), new Pair<>("&a2 Days Time", 2_400_000D))
+//            .put(Duration.ofDays(3L), new Pair<>("&a3 Days Time", 3_600_000D))
             .build();
 
     private final ChunkLoader loader;
@@ -40,6 +46,30 @@ public class ChunkLoaderTimeGui extends Gui {
 
     @Override
     public void redraw() {
+        setItem(7, ItemStackBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
+                .name(" ")
+                .build(null));
+
+        setItem(8, ItemStackBuilder.of(Material.GOLD_BLOCK)
+                .name("&aBuy Max Time")
+                .lore(
+                        "&fBuying this will refill your",
+                        "&fChunk Loader up to the max",
+                        "&famount of time! &7(3 days)",
+                        " ",
+                        "&8* &fTime: &b" + DurationFormatter.format(TIME_LEFT_ACCUMULATOR.apply(loader), true),
+                        "&8* &fPrice: &2$TODO",
+                        " "
+                )
+                .build(() -> {
+                    close();
+//                    double balanceRequired =
+
+                    Duration timeToAdd = TIME_LEFT_ACCUMULATOR.apply(loader);
+                    loader.setTimeLeft(loader.getTimeLeft() + timeToAdd.toSeconds());
+                    getPlayer().sendMessage(Text.colorize("&aYou have purchased the max amount of time for your Chunk Loader!"));
+                }));
+
         DURATION_PRICE_MAP.forEach((duration, pair) -> {
             String friendly = pair.getFirst();
             double price = pair.getSecond();

@@ -2,16 +2,19 @@ package com.bgsoftware.wildloaders.listeners;
 
 import com.bgsoftware.wildloaders.Locale;
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
-import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
 import me.lucko.helper.text3.Text;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.libs.org.apache.maven.repository.internal.DefaultVersionRangeResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,7 +25,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
 public final class BlocksListener implements Listener {
@@ -30,6 +34,20 @@ public final class BlocksListener implements Listener {
     private final WildLoadersPlugin plugin;
     private final Economy economy;
     private final ChunkLoaderMetaDao dao;
+
+    private static final List<String> REPLY_MESSAGES = List.of(
+            "&cAre you sure you want to place the Chunk Loader here?",
+            " ",
+            "&8* &fYou will not be able to get the Chunk Loader back once placed.",
+            " ",
+            "&aPlace again to confirm!"
+    );
+
+    private final Set<UUID> placementCache = Collections.newSetFromMap(ExpiringMap
+            .builder()
+            .expirationPolicy(ExpirationPolicy.CREATED)
+            .expiration(1L, TimeUnit.MINUTES)
+            .build());
 
     public BlocksListener(WildLoadersPlugin plugin, Economy economy, ChunkLoaderMetaDao dao) {
         this.plugin = plugin;
@@ -44,7 +62,7 @@ public final class BlocksListener implements Listener {
         String loaderName = plugin.getNMSAdapter().getTag(e.getItemInHand(), "loader-name", "");
         Optional<LoaderData> optionalLoaderData = plugin.getLoaders().getLoaderData(loaderName);
 
-        if (!optionalLoaderData.isPresent())
+        if (optionalLoaderData.isEmpty())
             return;
 
         if (!player.hasPermission("wildloaders.use")) {
@@ -76,8 +94,18 @@ public final class BlocksListener implements Listener {
             return;
         }
 
-        LoaderData loaderData = optionalLoaderData.get();
+        if (!placementCache.contains(player.getUniqueId())) {
+            e.setCancelled(true);
+            placementCache.add(player.getUniqueId());
+            REPLY_MESSAGES.stream()
+                    .map(Text::colorize)
+                    .forEach(player::sendMessage);
+            return;
+        }
 
+        placementCache.remove(player.getUniqueId());
+
+        LoaderData loaderData = optionalLoaderData.get();
         long timeLeft = plugin.getNMSAdapter().getTag(e.getItemInHand(), "loader-time", loaderData.getTimeLeft());
 
         plugin.getLoaders().addChunkLoader(loaderData, player, block.getLocation(), timeLeft);
