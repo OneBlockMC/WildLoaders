@@ -1,7 +1,7 @@
 package com.bgsoftware.wildloaders.gui;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import me.lucko.helper.item.ItemStackBuilder;
 import me.lucko.helper.menu.paginated.PaginatedGui;
 import me.lucko.helper.menu.paginated.PaginatedGuiBuilder;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class PaginatedChunkLoaderListGui extends PaginatedGui {
 
-    public PaginatedChunkLoaderListGui(Island island, IslandChunkLoaderStorageDao dao, WildLoadersPlugin plugin, Economy economy, Player player) {
+    public PaginatedChunkLoaderListGui(Island island, ChunkLoaderMetaDao dao, WildLoadersPlugin plugin, Economy economy, Player player) {
         super(gui -> {
                     gui.setItem(40, ItemStackBuilder.of(Material.GOLD_INGOT)
                             .name("&b&lBuy Chunk Loaders")
@@ -32,7 +32,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                             )
                             .build(() -> new ChunkLoaderPurchaseGui(player, island, plugin, economy, dao).open()));
 
-                    return dao.getChunkLoadersOnIsland(island)
+                    return plugin.getChunkLoadersOnIsland(island)
                             .stream()
                             .sorted((first, second) -> (int) (second.getTimeLeft() - first.getTimeLeft()))
                             .map(chunkLoader -> {
@@ -112,13 +112,13 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                 .mask("111111111")
                                 .mask("100000001")
                                 .mask("100000001")
-                                .mask("100000001")
+                                .mask("100111001")
                                 .mask("100101001")
                                 .mask("111111111")
                                 .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0)
                                 .scheme(0, 0)
                                 .scheme(0, 0)
-                                .scheme(0, 0)
+                                .scheme(0, 0, 0, 0, 0)
                                 .scheme(0, 0, 0, 0)
                                 .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0))
 

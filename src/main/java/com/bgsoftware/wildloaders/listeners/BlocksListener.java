@@ -5,15 +5,13 @@ import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
 import me.lucko.helper.text3.Text;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.libs.org.apache.maven.repository.internal.DefaultVersionRangeResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,9 +29,9 @@ public final class BlocksListener implements Listener {
 
     private final WildLoadersPlugin plugin;
     private final Economy economy;
-    private final IslandChunkLoaderStorageDao dao;
+    private final ChunkLoaderMetaDao dao;
 
-    public BlocksListener(WildLoadersPlugin plugin, Economy economy, IslandChunkLoaderStorageDao dao) {
+    public BlocksListener(WildLoadersPlugin plugin, Economy economy, ChunkLoaderMetaDao dao) {
         this.plugin = plugin;
         this.economy = economy;
         this.dao = dao;
@@ -71,7 +69,7 @@ public final class BlocksListener implements Listener {
         }
 
         Island island = optional.get();
-        int currentLoaderCount = dao.getChunkLoadersOnIsland(island).size();
+        int currentLoaderCount = plugin.getChunkLoadersOnIsland(island).size();
         if (currentLoaderCount >= plugin.getChunkLoaderLimit()) {
             e.setCancelled(true);
             player.sendMessage(Text.colorize("&cYour island is currently at the chunk loader limit of " + currentLoaderCount + "."));

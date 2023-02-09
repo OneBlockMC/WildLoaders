@@ -1,15 +1,10 @@
-package com.bgsoftware.wildloaders.island.impl;
+package com.bgsoftware.wildloaders.meta;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
-import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.google.common.base.Splitter;
-import me.lucko.helper.gson.GsonProvider;
 import me.lucko.helper.serialize.FileStorageHandler;
-import me.lucko.helper.serialize.Position;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -20,19 +15,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class FileIslandChunkLoaderStorageDao extends FileStorageHandler<Map<UUID, String>> implements IslandChunkLoaderStorageDao {
+public class FileChunkLoaderMetaStorage extends FileStorageHandler<Map<UUID, String>> implements ChunkLoaderMetaDao {
 
     private static final Splitter SPLITTER = Splitter.on('=');
 
     private final Map<UUID, String> loaderNameMap = new HashMap<>();
 
-    public FileIslandChunkLoaderStorageDao(WildLoadersPlugin plugin) {
+    public FileChunkLoaderMetaStorage(WildLoadersPlugin plugin) {
         super("chunk_loader_names", ".json", plugin.getDataFolder());
     }
 
     @Override
     public Optional<String> getCustomLoaderName(ChunkLoaderNPC npc) {
-        return Optional.ofNullable(loaderNameMap.get(npc.getUniqueId()));
+        return Optional.ofNullable(loaderNameMap.get(npc.getUniqueId())).map(input -> WildLoadersPlugin.STRIP_COLOR_PATTERN.matcher(input).replaceAll(""));
     }
 
     @Override

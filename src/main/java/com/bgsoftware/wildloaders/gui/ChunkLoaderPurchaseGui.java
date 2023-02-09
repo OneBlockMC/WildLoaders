@@ -2,7 +2,7 @@ package com.bgsoftware.wildloaders.gui;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.LoaderData;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.utils.Pair;
 import com.google.common.collect.HashBasedTable;
 import me.lucko.helper.item.ItemStackBuilder;
@@ -44,9 +44,9 @@ public class ChunkLoaderPurchaseGui extends Gui {
     private final WildLoadersPlugin plugin;
     private final Economy economy;
     private final Island island;
-    private final IslandChunkLoaderStorageDao dao;
+    private final ChunkLoaderMetaDao dao;
 
-    public ChunkLoaderPurchaseGui(Player player, Island island, WildLoadersPlugin plugin, Economy economy, IslandChunkLoaderStorageDao dao) {
+    public ChunkLoaderPurchaseGui(Player player, Island island, WildLoadersPlugin plugin, Economy economy, ChunkLoaderMetaDao dao) {
         super(player, 3, "&dBuy Chunk Loaders");
         this.plugin = plugin;
         this.economy = economy;

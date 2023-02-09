@@ -1,21 +1,18 @@
 package com.bgsoftware.wildloaders;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.api.WildLoaders;
 import com.bgsoftware.wildloaders.api.WildLoadersAPI;
+import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
-import com.bgsoftware.wildloaders.handlers.DataHandler;
-import com.bgsoftware.wildloaders.handlers.LoadersHandler;
-import com.bgsoftware.wildloaders.handlers.NPCHandler;
-import com.bgsoftware.wildloaders.handlers.ProvidersHandler;
-import com.bgsoftware.wildloaders.handlers.SettingsHandler;
-import com.bgsoftware.wildloaders.island.IslandChunkLoaderStorageDao;
-import com.bgsoftware.wildloaders.island.impl.FileIslandChunkLoaderStorageDao;
+import com.bgsoftware.wildloaders.handlers.*;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
 import com.bgsoftware.wildloaders.listeners.ChunksListener;
 import com.bgsoftware.wildloaders.listeners.PlayersListener;
+import com.bgsoftware.wildloaders.meta.FileChunkLoaderMetaStorage;
 import com.bgsoftware.wildloaders.metrics.Metrics;
 import com.bgsoftware.wildloaders.nms.NMSAdapter;
 import com.bgsoftware.wildloaders.utils.Pair;
@@ -23,6 +20,7 @@ import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import me.lucko.helper.Commands;
 import me.lucko.helper.Events;
+import me.lucko.helper.Services;
 import me.lucko.helper.event.filter.EventFilters;
 import me.lucko.helper.serialize.Position;
 import me.lucko.helper.text3.Text;
@@ -40,15 +38,17 @@ import world.bentobox.bentobox.api.flags.Flag;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.RanksManager;
 
-import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
-import java.rmi.server.UID;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
+
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + '&' + "[0-9A-FK-OR]");
 
     public static final Flag MANAGE_CHUNK_LOADERS_FLAG = new Flag.Builder("MANAGE_CHUNK_LOADERS", Material.BEACON)
             .defaultRank(RanksManager.OWNER_RANK)
@@ -82,7 +82,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
 
     private int chunkLoaderLimit;
 
-    private IslandChunkLoaderStorageDao dao;
+    private ChunkLoaderMetaDao dao;
 
     @Override
     public void onLoad() {
@@ -108,8 +108,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                 .getFlagsManager()
                 .registerFlag(MANAGE_CHUNK_LOADERS_FLAG);
 
-        this.dao = new FileIslandChunkLoaderStorageDao(this);
+        this.dao = new FileChunkLoaderMetaStorage(this);
         dao.setup();
+
+        Services.provide(ChunkLoaderMetaDao.class, dao);
 
         dataHandler = new DataHandler(this);
         loadersHandler = new LoadersHandler(this);
@@ -200,6 +202,18 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             npcHandler.killAllNPCs();
             dao.shutdown();
         }
+    }
+
+    public Set<ChunkLoader> getChunkLoadersOnIsland(Island island) {
+        return WildLoadersAPI.getWildLoaders()
+                .getLoaders()
+                .getChunkLoaders()
+                .stream()
+                .filter(loader -> {
+                    Location loaderLocation = loader.getLocation();
+                    return island.getBoundingBox().contains(loaderLocation.toVector());
+                })
+                .collect(Collectors.toSet());
     }
 
     private boolean loadNMSAdapter() {
