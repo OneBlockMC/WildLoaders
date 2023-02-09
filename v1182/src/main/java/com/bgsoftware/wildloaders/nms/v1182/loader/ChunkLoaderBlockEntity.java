@@ -1,10 +1,15 @@
 package com.bgsoftware.wildloaders.nms.v1182.loader;
 
+import com.bgsoftware.wildloaders.api.ChunkLoaderMetaDao;
 import com.bgsoftware.wildloaders.api.holograms.Hologram;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.loaders.ITileEntityChunkLoader;
 import com.bgsoftware.wildloaders.loaders.WChunkLoader;
 import com.bgsoftware.wildloaders.nms.v1182.EntityHologram;
+import me.lucko.helper.Helper;
+import me.lucko.helper.Services;
+import me.lucko.helper.text3.Text;
 import me.lucko.helper.time.DurationFormatter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -103,9 +108,16 @@ public final class ChunkLoaderBlockEntity extends BlockEntity implements ITileEn
     }
 
     private void updateName(EntityHologram hologram, String line) {
-        assert chunkLoader.getWhoPlaced().getName() != null;
+        ChunkLoaderMetaDao dao = Services.load(ChunkLoaderMetaDao.class);
+        ChunkLoaderNPC npc = chunkLoader.getNPC().orElse(null);
+        if (npc == null) {
+            return;
+        }
+
         hologram.setHologramName(line
-                .replace("{0}", chunkLoader.getWhoPlaced().getName())
+                .replace("{0}", dao.getCustomLoaderName(npc)
+                        .map(customName -> Text.colorize("&b" + customName + " &7(Owned by " + chunkLoader.getWhoPlaced().getName() + ")"))
+                        .orElse(Text.colorize("&b" + chunkLoader.getWhoPlaced().getName() + "'s Chunk Loader")))
                 .replace("{1}", DurationFormatter.format(Duration.ofSeconds(chunkLoader.getTimeLeft()), true))
         );
     }
