@@ -20,6 +20,8 @@ import java.util.function.Function;
 
 public class ChunkLoaderTimeGui extends Gui {
 
+    private static final double PRICE_PER_SECOND = 13.3D;
+
     private static final Function<ChunkLoader, Duration> TIME_LEFT_ACCUMULATOR = loader -> Duration.ofDays(3L).minus(Duration.ofSeconds(loader.getTimeLeft()));
 
     // Duration -> Pair<Friendly, Price>
@@ -58,14 +60,20 @@ public class ChunkLoaderTimeGui extends Gui {
                         "&famount of time! &7(3 days)",
                         " ",
                         "&8* &fTime: &b" + DurationFormatter.format(TIME_LEFT_ACCUMULATOR.apply(loader), true),
-                        "&8* &fPrice: &2$TODO",
+                        "&8* &fPrice: &2$&f" + WildLoadersPlugin.DECIMAL_FORMAT.format(TIME_LEFT_ACCUMULATOR.apply(loader).toSeconds() * PRICE_PER_SECOND),
                         " "
                 )
                 .build(() -> {
                     close();
-//                    double balanceRequired =
-
                     Duration timeToAdd = TIME_LEFT_ACCUMULATOR.apply(loader);
+
+                    double balanceRequired = timeToAdd.toSeconds() * PRICE_PER_SECOND;
+                    if (!economy.has(getPlayer(), balanceRequired)) {
+                        getPlayer().sendMessage(Text.colorize("&cYou must have &c&l$" + WildLoadersPlugin.DECIMAL_FORMAT.format(balanceRequired) + " &cto purchase this!"));
+                        return;
+                    }
+
+                    economy.withdrawPlayer(getPlayer(), balanceRequired);
                     loader.setTimeLeft(loader.getTimeLeft() + timeToAdd.toSeconds());
                     getPlayer().sendMessage(Text.colorize("&aYou have purchased the max amount of time for your Chunk Loader!"));
                 }));
