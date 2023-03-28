@@ -49,7 +49,7 @@ public class PaginatedChunkLoaderListGui extends PaginatedGui {
                                                                 "&f&l* &7Location&f: " + WordUtils.capitalizeFully(position.getWorld().replace("_", " ")) + " @ " + Math.round(position.getX()) + ", " + Math.round(position.getY()) + ", " + Math.round(position.getZ()),
                                                                 " ",
                                                                 "&f&l* &e&oLeft-Click to teleport",
-                                                                "&f&l* &e&oRight-Click to make changes",
+                                                                "&f&l* &e&oRight-Click to make changes &7(/cl manage)",
                                                                 " "
                                                         )
                                                         .build(() -> {

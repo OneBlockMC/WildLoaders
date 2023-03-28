@@ -7,6 +7,7 @@ import com.bgsoftware.wildloaders.api.WildLoadersAPI;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
 import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.command.CommandsHandler;
+import com.bgsoftware.wildloaders.gui.ChunkLoaderManageGui;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
 import com.bgsoftware.wildloaders.handlers.*;
 import com.bgsoftware.wildloaders.listeners.BlocksListener;
@@ -28,6 +29,8 @@ import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -146,9 +149,25 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                         return;
                     }
 
+                    if (context.args().size() >= 1) {
+                        String arg = context.arg(0).parseOrFail(String.class);
+                        if (arg.equalsIgnoreCase("manage")) {
+                            Block targetBlock = sender.getTargetBlock(5);
+                            if (targetBlock == null) {
+                                context.reply("&c&oCould not find a chunk loader that you are looking at nearby.");
+                                return;
+                            }
+
+                            loadersHandler.getChunkLoader(targetBlock.getLocation()).ifPresentOrElse(loader ->
+                                            new ChunkLoaderManageGui(sender, this, loader, economy).open(),
+                                    () -> context.reply("&c&oCould not find a chunk loader from the block you are looking at."));
+                            return;
+                        }
+                    }
+
                     new PaginatedChunkLoaderListGui(optional.get(), dao, this, economy, sender).open();
                 })
-                .register("chunkloaders");
+                .register("chunkloaders", "chunkloader", "cl");
 
         Events.subscribe(AsyncPlayerChatEvent.class, EventPriority.HIGHEST)
                 .filter(EventFilters.ignoreCancelled())
