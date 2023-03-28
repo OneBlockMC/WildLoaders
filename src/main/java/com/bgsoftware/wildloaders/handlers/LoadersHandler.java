@@ -14,12 +14,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 public final class LoadersHandler implements LoadersManager {
 
@@ -28,7 +24,7 @@ public final class LoadersHandler implements LoadersManager {
     private final Map<String, LoaderData> loadersData = Maps.newConcurrentMap();
     private final WildLoadersPlugin plugin;
 
-    public LoadersHandler(WildLoadersPlugin plugin){
+    public LoadersHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -71,7 +67,7 @@ public final class LoadersHandler implements LoadersManager {
         return chunkLoader;
     }
 
-    public WChunkLoader addChunkLoader(LoaderData loaderData, UUID placer, Location location, long timeLeft){
+    public WChunkLoader addChunkLoader(LoaderData loaderData, UUID placer, Location location, long timeLeft) {
         WChunkLoader chunkLoader = new WChunkLoader(loaderData, placer, location, timeLeft);
         chunkLoaders.put(location, chunkLoader);
         for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
@@ -86,7 +82,15 @@ public final class LoadersHandler implements LoadersManager {
         Location location = chunkLoader.getLocation();
         chunkLoaders.remove(location);
         for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
-            chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
+
+            boolean isChunkLoadedByOtherLoader = chunkLoaders.values()
+                    .stream()
+                    .filter(filtered -> !filtered.getLocation().equals(chunkLoader.getLocation())) // Ensure it is not the same loader
+                    .anyMatch(otherLoader -> Arrays.asList(otherLoader.getLoadedChunks()).contains(loadedChunk));
+
+            if (!isChunkLoadedByOtherLoader) {
+                chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
+            }
         }
         chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
 
