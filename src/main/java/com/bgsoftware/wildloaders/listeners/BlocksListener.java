@@ -8,10 +8,12 @@ import com.bgsoftware.wildloaders.api.loaders.LoaderData;
 import com.bgsoftware.wildloaders.gui.PaginatedChunkLoaderListGui;
 import com.bgsoftware.wildloaders.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildloaders.utils.legacy.Materials;
+import me.lucko.helper.serialize.BlockPosition;
 import me.lucko.helper.text3.Text;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.org.apache.maven.repository.internal.DefaultVersionRangeResolver;
@@ -22,6 +24,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -43,16 +47,37 @@ public final class BlocksListener implements Listener {
             "&aPlace again to confirm!"
     );
 
-    private final Set<UUID> placementCache = Collections.newSetFromMap(ExpiringMap
+    private final ExpiringMap<UUID, BlockPosition> placementCacheMap = ExpiringMap
             .builder()
             .expirationPolicy(ExpirationPolicy.CREATED)
-            .expiration(1L, TimeUnit.MINUTES)
-            .build());
+            .expiration(15L, TimeUnit.SECONDS)
+            .asyncExpirationListener((uuid, $) -> {
+                Player target = Bukkit.getPlayer(((UUID) uuid));
+                if (target == null) return;
+                target.sendMessage(Text.colorize("&cYour chunk loader placement time has expired."));
+            })
+            .build();
 
     public BlocksListener(WildLoadersPlugin plugin, Economy economy, ChunkLoaderMetaDao dao) {
         this.plugin = plugin;
         this.economy = economy;
         this.dao = dao;
+    }
+
+    @EventHandler
+    private void onItemSwap(PlayerSwapHandItemsEvent event) {
+        Player player = event.getPlayer();
+        if (!placementCacheMap.containsKey(player.getUniqueId())) return;
+        placementCacheMap.remove(player.getUniqueId());
+        player.sendMessage(Text.colorize("&cYour chunk loader placement activity has been invalidated."));
+    }
+
+    @EventHandler
+    private void onItemHeld(PlayerItemHeldEvent event) {
+        Player player = event.getPlayer();
+        if (!placementCacheMap.containsKey(player.getUniqueId())) return;
+        placementCacheMap.remove(player.getUniqueId());
+        player.sendMessage(Text.colorize("&cYour chunk loader placement activity has been invalidated."));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -94,17 +119,24 @@ public final class BlocksListener implements Listener {
             return;
         }
 
-        if (!placementCache.contains(player.getUniqueId())) {
+        if (!placementCacheMap.containsKey(player.getUniqueId())) {
             e.setCancelled(true);
-            placementCache.add(player.getUniqueId());
+            placementCacheMap.put(player.getUniqueId(), BlockPosition.of(block));
             REPLY_MESSAGES.stream()
                     .map(Text::colorize)
                     .forEach(player::sendMessage);
             return;
         }
 
-        placementCache.remove(player.getUniqueId());
 
+        BlockPosition position = placementCacheMap.get(player.getUniqueId());
+        if (!position.equals(BlockPosition.of(block))) {
+            e.setCancelled(true);
+            player.sendMessage(Text.colorize("&cPlease place your chunk loader in the same location!"));
+            return;
+        }
+
+        placementCacheMap.remove(player.getUniqueId());
         LoaderData loaderData = optionalLoaderData.get();
         long timeLeft = plugin.getNMSAdapter().getTag(e.getItemInHand(), "loader-time", loaderData.getTimeLeft());
 
