@@ -81,17 +81,7 @@ public final class LoadersHandler implements LoadersManager {
     public void removeChunkLoader(ChunkLoader chunkLoader) {
         Location location = chunkLoader.getLocation();
         chunkLoaders.remove(location);
-        for (Chunk loadedChunk : chunkLoader.getLoadedChunks()) {
-
-            boolean isChunkLoadedByOtherLoader = chunkLoaders.values()
-                    .stream()
-                    .filter(filtered -> !filtered.getLocation().equals(chunkLoader.getLocation())) // Ensure it is not the same loader
-                    .anyMatch(otherLoader -> Arrays.asList(otherLoader.getLoadedChunks()).contains(loadedChunk));
-
-            if (!isChunkLoadedByOtherLoader) {
-                chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
-            }
-        }
+        unloadLoadedChunks(chunkLoader);
         chunkLoader.getNPC().ifPresent(npc -> plugin.getNPCs().killNPC(npc));
 
         Query.DELETE_CHUNK_LOADER.insertParameters()
@@ -116,5 +106,20 @@ public final class LoadersHandler implements LoadersManager {
         chunkLoaders.values().forEach(chunkLoader -> plugin.getNMSAdapter().removeLoader(chunkLoader, false));
         chunkLoaders.clear();
         chunkLoadersByChunks.clear();
+    }
+
+    public void unloadLoadedChunks(ChunkLoader loader) {
+        for (Chunk loadedChunk : loader.getLoadedChunks()) {
+
+            boolean isChunkLoadedByOtherLoader = chunkLoaders.values()
+                    .stream()
+                    .filter(filtered -> !filtered.getLocation().equals(loader.getLocation())) // Ensure it is not the same loader
+                    .anyMatch(otherLoader -> Arrays.asList(otherLoader.getLoadedChunks()).contains(loadedChunk));
+
+            if (!isChunkLoadedByOtherLoader) {
+                loadedChunk.unload(true);
+                chunkLoadersByChunks.remove(ChunkPosition.of(loadedChunk));
+            }
+        }
     }
 }

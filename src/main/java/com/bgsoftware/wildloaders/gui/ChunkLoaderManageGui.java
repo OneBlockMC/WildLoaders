@@ -66,7 +66,7 @@ public class ChunkLoaderManageGui extends Gui {
                     }
 
                     close();
-                    new ChunkLoaderTimeGui(getPlayer(), loader, economy).open();
+                    new ChunkLoaderTimeGui(getPlayer(), loader, economy, plugin).open();
                 }));
 
         setItem(15, ItemStackBuilder.of(Material.BARRIER)

@@ -34,6 +34,8 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
     private static final ReflectMethod<Void> SET_GAMEMODE = new ReflectMethod<>(ServerPlayerGameMode.class,
             1, GameType.class, GameType.class);
 
+    private final MinecraftServer minecraftServer;
+    private final Location location;
     private final ServerLevel serverLevel;
     private final AABB boundingBox;
 
@@ -42,10 +44,14 @@ public final class ChunkLoaderNPCImpl extends ServerPlayer implements ChunkLoade
     public ChunkLoaderNPCImpl(MinecraftServer minecraftServer, Location location, UUID uuid) {
         super(minecraftServer, ((CraftWorld) location.getWorld()).getHandle(),
                 new GameProfile(uuid, NPCHandler.getName(location.getWorld().getName())));
-
+        this.minecraftServer = minecraftServer;
+        this.location = location;
         this.serverLevel = getLevel();
         this.boundingBox = new AABB(new BlockPos(location.getX(), location.getY(), location.getZ()));
+    }
 
+    @Override
+    public void spawn() {
         this.connection = new DummyServerGamePacketListenerImpl(minecraftServer, this);
 
         SET_GAMEMODE.invoke(this.gameMode, GameType.CREATIVE, null);

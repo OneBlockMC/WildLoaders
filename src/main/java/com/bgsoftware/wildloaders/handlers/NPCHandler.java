@@ -6,13 +6,20 @@ import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.npc.NPCIdentifier;
 import com.bgsoftware.wildloaders.utils.database.Query;
 import com.google.common.collect.Maps;
+import me.lucko.helper.serialize.Position;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Zombie;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootTable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class NPCHandler implements NPCManager {
 
@@ -21,7 +28,6 @@ public final class NPCHandler implements NPCManager {
     private final WildLoadersPlugin plugin;
     private final Map<NPCIdentifier, ChunkLoaderNPC> npcs = Maps.newConcurrentMap();
     private final Map<NPCIdentifier, UUID> npcUUIDs = Maps.newConcurrentMap();
-
 
     public NPCHandler(WildLoadersPlugin plugin) {
         this.plugin = plugin;
@@ -34,6 +40,16 @@ public final class NPCHandler implements NPCManager {
 
     @Override
     public ChunkLoaderNPC createNPC(Location location) {
+        NPCIdentifier identifier = new NPCIdentifier(location);
+
+        if (npcs.containsKey(identifier)) {
+            ChunkLoaderNPC npc = npcs.get(identifier);
+            npc.spawn();
+            plugin.getLogger().info("Respawned npc");
+            return npc;
+        }
+
+        plugin.getLogger().info("Created new npc");
         return npcs.computeIfAbsent(new NPCIdentifier(location), i -> plugin.getNMSAdapter().createNPC(i.getSpawnLocation(), getUUID(i)));
     }
 

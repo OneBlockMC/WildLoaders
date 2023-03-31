@@ -86,7 +86,9 @@ public final class NMSAdapter implements com.bgsoftware.wildloaders.nms.NMSAdapt
 
     @Override
     public com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC createNPC(Location location, UUID uuid) {
-        return new ChunkLoaderNPCImpl(((CraftServer) Bukkit.getServer()).getServer(), location, uuid);
+        ChunkLoaderNPCImpl impl = new ChunkLoaderNPCImpl(((CraftServer) Bukkit.getServer()).getServer(), location, uuid);
+        impl.spawn();
+        return impl;
     }
 
     @Override

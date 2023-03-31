@@ -2,6 +2,7 @@ package com.bgsoftware.wildloaders.gui;
 
 import com.bgsoftware.wildloaders.WildLoadersPlugin;
 import com.bgsoftware.wildloaders.api.loaders.ChunkLoader;
+import com.bgsoftware.wildloaders.api.npc.ChunkLoaderNPC;
 import com.bgsoftware.wildloaders.utils.Pair;
 import com.google.common.collect.ImmutableMap;
 import me.lucko.helper.item.ItemStackBuilder;
@@ -12,13 +13,12 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.text.DecimalFormat;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
 
 public class ChunkLoaderTimeGui extends Gui {
+
+    private final WildLoadersPlugin plugin;
 
     private static final double PRICE_PER_SECOND = 13.3D;
 
@@ -33,17 +33,16 @@ public class ChunkLoaderTimeGui extends Gui {
             .put(Duration.ofHours(16L), new Pair<>("&a16 Hours Time", 800_000D))
             .put(Duration.ofHours(20L), new Pair<>("&a20 Hours Time", 1_000_000D))
             .put(Duration.ofDays(1L), new Pair<>("&a1 Day Time", 1_200_000D))
-//            .put(Duration.ofDays(2L), new Pair<>("&a2 Days Time", 2_400_000D))
-//            .put(Duration.ofDays(3L), new Pair<>("&a3 Days Time", 3_600_000D))
             .build();
 
     private final ChunkLoader loader;
     private final Economy economy;
 
-    public ChunkLoaderTimeGui(Player player, ChunkLoader loader, Economy economy) {
+    public ChunkLoaderTimeGui(Player player, ChunkLoader loader, Economy economy, WildLoadersPlugin plugin) {
         super(player, 1, "&dBuy more time!");
         this.loader = loader;
         this.economy = economy;
+        this.plugin = plugin;
     }
 
     @Override
@@ -108,6 +107,7 @@ public class ChunkLoaderTimeGui extends Gui {
                         if (loader.isWaiting()) {
                             loader.setWaiting(false);
                             loader.setTimeLeft(duration.toSeconds());
+                            plugin.getNPCs().createNPC(loader.getLocation());
                         } else {
                             loader.setTimeLeft(loader.getTimeLeft() + duration.toSeconds());
                         }

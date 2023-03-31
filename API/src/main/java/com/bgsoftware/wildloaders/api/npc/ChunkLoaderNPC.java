@@ -31,4 +31,6 @@ public interface ChunkLoaderNPC {
      */
     Player getPlayer();
 
+    void spawn();
+
 }
