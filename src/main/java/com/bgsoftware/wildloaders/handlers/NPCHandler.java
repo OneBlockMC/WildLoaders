@@ -45,11 +45,9 @@ public final class NPCHandler implements NPCManager {
         if (npcs.containsKey(identifier)) {
             ChunkLoaderNPC npc = npcs.get(identifier);
             npc.spawn();
-            plugin.getLogger().info("Respawned npc");
             return npc;
         }
 
-        plugin.getLogger().info("Created new npc");
         return npcs.computeIfAbsent(new NPCIdentifier(location), i -> plugin.getNMSAdapter().createNPC(i.getSpawnLocation(), getUUID(i)));
     }
 

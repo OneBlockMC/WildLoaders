@@ -68,14 +68,17 @@ public final class WChunkLoader implements ChunkLoader {
     }
 
     public void tick() {
-        if (!(timeLeft < 0)) {
-            plugin.getProviders().tick(loadedChunks);
-        }
+//        if (!(timeLeft < 0)) {
+//            System.out.println("ticking");
+//            plugin.getProviders().tick(loadedChunks);
+//        }
 
         if (!isInfinite()) {
             timeLeft--;
             if (timeLeft <= 0 && !waiting) {
                 waiting = true;
+                getNPC().ifPresent(ChunkLoaderNPC::die);
+                plugin.getLoaders().unloadLoadedChunks(this);
                 holograms.get(1).setHologramName(Text.colorize("&cThis chunk loader has run out of time."));
                 holograms.get(0).setHologramName(Text.colorize("&cPurchase more time for this chunk loader to activate."));
             } else if (!waiting && timeLeft % 10 == 0) {
