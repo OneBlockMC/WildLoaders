@@ -131,6 +131,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
         Economy economy = provider.getProvider();
 
         Commands.create()
+                .assertPermission("ob.chunkloaders.manage")
                 .assertPlayer()
                 .handler(context -> {
                     Player sender = context.sender();
