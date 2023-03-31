@@ -27,18 +27,15 @@ public class ChunkLoaderPurchaseGui extends Gui {
     private static final HashBasedTable<Integer, String, Pair<Duration, Double>> LOADER_INFO_TABLE = HashBasedTable.create();
 
     static {
-        LOADER_INFO_TABLE.put(10, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofHours(6L), 600_000D));
-        LOADER_INFO_TABLE.put(12, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofHours(12L), 900_000D));
-        LOADER_INFO_TABLE.put(14, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofDays(1L), 1_500_000D));
-        LOADER_INFO_TABLE.put(16, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofDays(3L), 3_900_000D));
+        LOADER_INFO_TABLE.put(13, "&3&l5x5 &b&lChunk Loader", new Pair<>(Duration.ofHours(12L), 2_500_000D));
     }
 
     private static final MenuScheme PANE_SCHEME = new MenuScheme(StandardSchemeMappings.STAINED_GLASS)
             .mask("111111111")
-            .mask("101010101")
+            .mask("111101111")
             .mask("111111111")
             .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0)
-            .scheme(0, 0, 0, 0, 0, 0)
+            .scheme(0, 0, 0, 0, 0, 0, 0, 0)
             .scheme(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     private final WildLoadersPlugin plugin;
@@ -47,7 +44,7 @@ public class ChunkLoaderPurchaseGui extends Gui {
     private final ChunkLoaderMetaDao dao;
 
     public ChunkLoaderPurchaseGui(Player player, Island island, WildLoadersPlugin plugin, Economy economy, ChunkLoaderMetaDao dao) {
-        super(player, 3, "&dBuy Chunk Loaders");
+        super(player, 3, "&dBuy Chunk Loader");
         this.plugin = plugin;
         this.economy = economy;
         this.island = island;
