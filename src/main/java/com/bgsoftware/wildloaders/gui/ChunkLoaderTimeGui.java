@@ -29,7 +29,7 @@ public class ChunkLoaderTimeGui extends Gui {
             .put(Duration.ofHours(1L), new Pair<>("&a1 Hour Time", 50_000D))
             .put(Duration.ofHours(2L), new Pair<>("&a2 Hours Time", 100_000D))
             .put(Duration.ofHours(3L), new Pair<>("&a3 Hours Time", 150_000D))
-            .put(Duration.ofHours(12L), new Pair<>("&a4 Hours Time", 200_000D))
+            .put(Duration.ofHours(4L), new Pair<>("&a4 Hours Time", 200_000D))
             .put(Duration.ofHours(16L), new Pair<>("&a16 Hours Time", 800_000D))
             .put(Duration.ofHours(20L), new Pair<>("&a20 Hours Time", 1_000_000D))
             .put(Duration.ofDays(1L), new Pair<>("&a1 Day Time", 1_200_000D))
