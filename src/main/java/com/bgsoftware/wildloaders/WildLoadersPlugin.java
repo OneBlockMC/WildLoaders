@@ -38,6 +38,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.flags.Flag;
+import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.RanksManager;
 
@@ -158,7 +159,10 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                                 context.reply("&c&oCould not find a chunk loader that you are looking at nearby.");
                                 return;
                             }
-
+                            if (!island.isAllowed(User.getInstance(sender), WildLoadersPlugin.MANAGE_CHUNK_LOADERS_FLAG)) {
+                                sender.sendMessage(Text.colorize("&cYou are not allowed to manage chunk loaders on this island."));
+                                return;
+                            }
                             loadersHandler.getChunkLoader(targetBlock.getLocation()).ifPresentOrElse(loader ->
                                             new ChunkLoaderManageGui(sender, this, loader, economy).open(),
                                     () -> context.reply("&c&oCould not find a chunk loader from the block you are looking at."));
