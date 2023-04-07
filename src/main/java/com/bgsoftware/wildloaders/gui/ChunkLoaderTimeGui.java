@@ -59,14 +59,14 @@ public class ChunkLoaderTimeGui extends Gui {
                         "&famount of time! &7(3 days)",
                         " ",
                         "&8* &fTime: &b" + DurationFormatter.format(TIME_LEFT_ACCUMULATOR.apply(loader), true),
-                        "&8* &fPrice: &2$&f" + WildLoadersPlugin.DECIMAL_FORMAT.format(TIME_LEFT_ACCUMULATOR.apply(loader).toHours() * PRICE_PER_HOUR),
+                        "&8* &fPrice: &2$&f" + WildLoadersPlugin.DECIMAL_FORMAT.format(this.calcHours(TIME_LEFT_ACCUMULATOR.apply(loader)) * PRICE_PER_HOUR),
                         " "
                 )
                 .build(() -> {
                     close();
                     Duration timeToAdd = TIME_LEFT_ACCUMULATOR.apply(loader);
 
-                    double balanceRequired = timeToAdd.toHours() * PRICE_PER_HOUR;
+                    double balanceRequired = this.calcHours(TIME_LEFT_ACCUMULATOR.apply(loader)) * PRICE_PER_HOUR;
                     if (!economy.has(getPlayer(), balanceRequired)) {
                         getPlayer().sendMessage(Text.colorize("&cYou must have &c&l$" + WildLoadersPlugin.DECIMAL_FORMAT.format(balanceRequired) + " &cto purchase this!"));
                         return;
@@ -107,6 +107,10 @@ public class ChunkLoaderTimeGui extends Gui {
                         getPlayer().sendMessage(Text.colorize("&aYou have purchased " + friendly + " for your chunk loader."));
                     }));
         });
+    }
+
+    private double calcHours(Duration d){
+        return (((d.toMillis() / 1000d) / 60d) / 60d);
     }
 
     private void handleTimeAddition(Duration timeToAdd, ChunkLoader loader) {
