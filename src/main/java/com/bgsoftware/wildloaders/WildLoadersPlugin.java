@@ -21,6 +21,7 @@ import com.bgsoftware.wildloaders.utils.ServerVersion;
 import com.bgsoftware.wildloaders.utils.database.Database;
 import me.lucko.helper.Commands;
 import me.lucko.helper.Events;
+import me.lucko.helper.Helper;
 import me.lucko.helper.Services;
 import me.lucko.helper.event.filter.EventFilters;
 import me.lucko.helper.serialize.Position;
@@ -108,9 +109,14 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
             return;
         }
 
-        BentoBox.getInstance()
-                .getFlagsManager()
-                .registerFlag(MANAGE_CHUNK_LOADERS_FLAG);
+        if (Helper.plugins().isPluginEnabled("BentoBox")) {
+            BentoBox.getInstance()
+                    .getFlagsManager()
+                    .registerFlag(new Flag.Builder("MANAGE_CHUNK_LOADERS", Material.BEACON)
+                            .defaultRank(RanksManager.OWNER_RANK)
+                            .type(Flag.Type.SETTING)
+                            .build());
+        }
 
         this.dao = new FileChunkLoaderMetaStorage(this);
         dao.setup();
