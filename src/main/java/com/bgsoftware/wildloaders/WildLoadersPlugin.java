@@ -114,7 +114,7 @@ public final class WildLoadersPlugin extends JavaPlugin implements WildLoaders {
                     .getFlagsManager()
                     .registerFlag(new Flag.Builder("MANAGE_CHUNK_LOADERS", Material.BEACON)
                             .defaultRank(RanksManager.OWNER_RANK)
-                            .type(Flag.Type.SETTING)
+                            .type(Flag.Type.PROTECTION)
                             .build());
         }
 
